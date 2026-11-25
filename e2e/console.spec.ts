@@ -18,9 +18,19 @@ for (const [name, path, heading] of [
     await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
     await axe(page);
     await page.getByRole('button', { name: 'Switch to light mode' }).click();
+    // Colours fade between themes; check the settled colours, not a frame mid-fade.
+    await page.waitForFunction(() => document.getAnimations().every((a) => !(a instanceof CSSTransition) || a.playState !== 'running'));
     await axe(page);
   });
 }
+
+test('Theme switches both ways without axe running', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Switch to light mode' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-spark-theme', 'light');
+  await page.getByRole('button', { name: 'Switch to dark mode' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-spark-theme', 'dark');
+});
 
 test('Search jumps to a service, filtered', async ({ page }) => {
   await page.goto('/');
