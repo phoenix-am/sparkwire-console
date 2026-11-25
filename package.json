@@ -1,0 +1,32 @@
+{
+  "name": "sparkwire-console",
+  "private": true,
+  "version": "0.1.0",
+  "description": "An ops console built on Sparkwire from npm, to test the library the way its users do.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 4174 --strictPort",
+    "typecheck": "tsc -b",
+    "test:e2e": "playwright test",
+    "size": "node scripts/size.mjs"
+  },
+  "dependencies": {
+    "@sparkwire/core": "^0.4.4",
+    "@sparkwire/styles": "^0.4.4",
+    "@sparkwire/system": "^0.4.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router": "^7.18.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.1",
+    "@playwright/test": "^1.65.1",
+    "@types/react": "^19.3.3",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.8"
+  }
+}

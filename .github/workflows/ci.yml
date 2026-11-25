@@ -1,0 +1,37 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Weekly, so a new Sparkwire release that breaks the app shows up even without app changes.
+  schedule:
+    - cron: '17 3 * * 1'
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      # Exactly what a user does: install from npm, no flags.
+      - run: npm ci
+      - name: Typecheck against the published types
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+      - name: Bundle size
+        run: npm run size
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Browser and accessibility tests
+        run: npm run test:e2e
+      - name: Keep the traces of failed tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
