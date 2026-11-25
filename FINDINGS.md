@@ -17,3 +17,9 @@ Newest first. Each entry: what happened in the app, the cause in the library, an
 - With `skipLibCheck: false` and `lib` below ES2023, a dependency's types (`@internationalized/number`) need `Intl.NumberRangeFormatPart`. Use `"lib": ["ES2023", …]` or `skipLibCheck: true`.
 - Change handlers differ: `Textfield` gives an event, `Textarea` gives the string, `Switch` gives a boolean. Worth unifying before 1.0.
 - A sticky top bar needs `scroll-padding-top` on `<html>`, or focused fields and open lists slide under it.
+
+## Test tooling
+
+- Running axe-core in headless Firefox on GitHub Actions crashes the page process. Switching themes in Firefox without axe works, so the
+  accessibility checks run in Chromium and WebKit only.
+- Theme colours fade, so contrast must be checked after the CSS transitions end (WebKit caught a mid-fade frame).
