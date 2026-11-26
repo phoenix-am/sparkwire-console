@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Button, FileUpload, Switch, Tabs, TabList, Tab, TabPanel, Textfield, useToast } from '@sparkwire/core';
+import { Button, FileUpload, Switch, Tabs, TabList, Tab, TabPanel, Textfield, ToggleGroup, ToggleGroupItem, useToast } from '@sparkwire/core';
+import { useSettings, type Energy } from '../lib/settings';
 
 /** Team settings: profile, alerts and config import. */
 export function Settings() {
   const { toast } = useToast();
+  const { settings, set } = useSettings();
   const [team, setTeam] = useState('Platform');
   const [slack, setSlack] = useState('#deploys');
   const [alerts, setAlerts] = useState({ failed: true, paused: false, daily: true });
@@ -20,6 +22,7 @@ export function Settings() {
           <Tab value="team">Team</Tab>
           <Tab value="alerts">Alerts</Tab>
           <Tab value="import">Import</Tab>
+          <Tab value="appearance">Appearance</Tab>
         </TabList>
         <TabPanel value="team">
           <form
@@ -55,6 +58,20 @@ export function Settings() {
                 if (files.length) toast({ title: `Read ${files[0].file.name}`, tone: 'success' });
               }}
             />
+          </div>
+        </TabPanel>
+        <TabPanel value="appearance">
+          <div className="form">
+            <div>
+              <p className="field-label" id="energy-label">Energy</p>
+              <ToggleGroup aria-labelledby="energy-label" fullWidth value={settings.energy} onChange={(v) => v && set({ energy: v as Energy })}>
+                <ToggleGroupItem value="off">Off</ToggleGroupItem>
+                <ToggleGroupItem value="calm">Calm</ToggleGroupItem>
+                <ToggleGroupItem value="default">Default</ToggleGroupItem>
+                <ToggleGroupItem value="electric">Electric</ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+            <Switch label="Light mode" checked={settings.mode === 'light'} onChange={(on) => set({ mode: on ? 'light' : 'dark' })} />
           </div>
         </TabPanel>
       </Tabs>

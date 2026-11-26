@@ -77,10 +77,10 @@ function Shell() {
                   <Icon d="M4 6h16M4 12h16M4 18h16" />
                 </Button>
                 <Button variant="outlined" size="small" onClick={() => setSearchOpen(true)}>
-                  Search services
+                  Search<span className="wide-only"> services</span>
                 </Button>
                 <div className="topbar__end">
-                  <ToggleGroup aria-label="Energy" size="small" value={settings.energy} onChange={(v) => v && set({ energy: v as Energy })}>
+                  <ToggleGroup aria-label="Energy" size="small" className="energy-switch" value={settings.energy} onChange={(v) => v && set({ energy: v as Energy })}>
                     <ToggleGroupItem value="off">Off</ToggleGroupItem>
                     <ToggleGroupItem value="calm">Calm</ToggleGroupItem>
                     <ToggleGroupItem value="default">Default</ToggleGroupItem>

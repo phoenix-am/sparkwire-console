@@ -101,7 +101,7 @@ export function Services() {
                 <Badge tone={TONE[detail.status]} variant="soft" led>
                   {detail.status}
                 </Badge>
-                <Progress label={`Uptime ${detail.uptime.toFixed(2)}%`} value={detail.uptime} />
+                <Progress label={`Uptime ${detail.uptime.toFixed(2)}%`} value={detail.uptime} showValue={false} />
                 <p>Last deploy {when.format(detail.lastDeploy)}</p>
               </div>
             </TabPanel>

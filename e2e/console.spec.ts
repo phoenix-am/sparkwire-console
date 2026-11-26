@@ -48,7 +48,7 @@ test('Theme switches both ways without axe running', async ({ page }) => {
 
 test('Search jumps to a service, filtered', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Search services' }).click();
+  await page.getByRole('button', { name: /^Search/ }).click();
   await page.getByRole('combobox').pressSequentially('payme');
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/services\?q=payments/);
@@ -72,12 +72,12 @@ test('Pause two services, then undo', async ({ page }) => {
   await expect(rows.nth(1)).toContainText('live');
 });
 
-test('Deployment form explains what is missing, then deploys', async ({ page }) => {
+test('Deployment steps explain what is missing, then deploy', async ({ page }) => {
   await page.goto('/deploy');
-  await page.getByRole('button', { name: 'Deploy', exact: true }).click();
+  const go = page.getByRole('button', { name: 'Continue' });
+  await go.click();
   await expect(page.getByText('Pick a service.')).toBeVisible();
   await expect(page.getByText('Use a version like 1.4.2.')).toBeVisible();
-  await expect(page.getByText('Pick a region.')).toBeVisible();
 
   // Pick from the lists by keyboard. (Clicking works too, but Playwright may scroll the page
   // to reach an option, and an open list closes when the page scrolls, by design.)
@@ -89,6 +89,11 @@ test('Deployment form explains what is missing, then deploys', async ({ page }) 
   await page.keyboard.press('Enter');
   await expect(service).toHaveValue('payments');
   await page.getByRole('textbox', { name: 'Version' }).fill('2.1.0');
+  await go.click();
+
+  await expect(page.getByRole('heading', { name: /^Where/ })).toBeFocused();
+  await go.click();
+  await expect(page.getByText('Pick a region.')).toBeVisible();
   const region = page.getByRole('button', { name: /Region/ });
   await region.focus();
   await page.keyboard.press('Enter');
@@ -96,12 +101,17 @@ test('Deployment form explains what is missing, then deploys', async ({ page }) 
   await page.keyboard.type('eu');
   await page.keyboard.press('Enter');
   await expect(region).toContainText('eu-west-1');
+  await go.click();
+
+  await expect(page.getByText('payments 2.1.0')).toBeVisible();
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect(region).toContainText('eu-west-1');
+  await go.click();
   await page.getByRole('button', { name: 'Deploy', exact: true }).click();
 
   await expect(page).toHaveURL(/\/services$/);
   await expect(page.getByText('Deploying payments 2.1.0')).toBeVisible();
 });
-
 test('Reset clears a typed field (controlled Textfield)', async ({ page }) => {
   await page.goto('/deploy');
   const version = page.getByRole('textbox', { name: 'Version' });
@@ -172,3 +182,16 @@ test('Settings: team name is required, alerts toggle, config uploads', async ({ 
   await page.locator('input[type=file]').setInputFiles({ name: 'services.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
   await expect(page.getByText('Read services.json')).toBeVisible();
 });
+
+test('@mobile phone: energy moves to Settings, and the top bar stays short', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/settings');
+  await expect(page.getByRole('radiogroup', { name: 'Energy' })).toHaveCount(0);
+  await page.getByRole('tab', { name: 'Appearance' }).click();
+  const energy = page.getByRole('radiogroup', { name: 'Energy' });
+  await energy.getByRole('radio', { name: 'Calm' }).click();
+  await expect(energy.getByRole('radio', { name: 'Calm' })).toBeChecked();
+  const bar = await page.locator('.topbar').boundingBox();
+  expect(bar!.height).toBeLessThan(80);
+});
+

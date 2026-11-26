@@ -36,7 +36,7 @@ export function Overview() {
         </Card>
         <Card>
           <p className="kpi__label">Average uptime</p>
-          <Progress label={`${uptime.toFixed(2)}%`} value={uptime} />
+          <Progress label={`${uptime.toFixed(2)}%`} value={uptime} showValue={false} />
         </Card>
       </section>
       <section className="charts">

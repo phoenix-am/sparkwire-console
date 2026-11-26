@@ -29,3 +29,12 @@ body { margin: 0; background: var(--spark-surface-base); color: var(--spark-text
 .detail .sp-progress { align-self: stretch; }
 .big-number { font-size: 1.75rem; font-weight: 600; margin: 0; }
 .link-button { margin-inline-start: -0.5rem; }
+.form-card .sp-stepper { margin-block-end: 1.5rem; }
+.step-title { font-size: 1rem; margin: 0; outline: none; }
+.summary { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; margin: 0; }
+.summary dt { color: var(--sp-text-muted, inherit); }
+.summary dd { margin: 0; }
+/* On phones the energy dial lives in Settings → Appearance, so the top bar stays one line. */
+@media (max-width: 767px) { .energy-switch { display: none; } }
+.field-label { margin: 0 0 0.5rem; font-weight: 500; }
+@media (max-width: 767px) { .topbar { flex-wrap: nowrap; padding-inline: 1rem; gap: 0.5rem; } .topbar__end { flex-wrap: nowrap; } .wide-only { display: none; } }
