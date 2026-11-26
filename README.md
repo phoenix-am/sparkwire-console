@@ -26,4 +26,3 @@ Settings (light/dark, energy, language) are kept in `localStorage`.
 - **Bundle size** of the built app against `scripts/size-budget.json`.
 - **Weekly run**, so a new Sparkwire release that breaks the app is caught even when the app hasn't changed.
 
-What building this has found in the library so far is in [FINDINGS.md](FINDINGS.md).
