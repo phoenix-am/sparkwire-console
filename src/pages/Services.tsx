@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { Badge, Button, DataTable, Modal, useToast } from '@sparkwire/core';
+import { Badge, Button, DataTable, Drawer, Modal, Progress, Tabs, TabList, Tab, TabPanel, useToast } from '@sparkwire/core';
 import { services as initial, type Service, type Status } from '../lib/data';
 import { useMoney, useSettings } from '../lib/settings';
 
@@ -14,6 +14,7 @@ export function Services() {
   const [rows, setRows] = useState<Service[]>(initial);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirm, setConfirm] = useState<Service[] | null>(null);
+  const [detail, setDetail] = useState<Service | null>(null);
   const when = useMemo(() => new Intl.DateTimeFormat(settings.locale, { dateStyle: 'medium', timeStyle: 'short' }), [settings.locale]);
 
   const pause = (list: Service[]) => {
@@ -51,7 +52,16 @@ export function Services() {
         )}
         defaultPageSize={10}
         columns={[
-          { key: 'name', header: 'Service', sortable: true },
+          {
+            key: 'name',
+            header: 'Service',
+            sortable: true,
+            cell: (s) => (
+              <Button variant="text" size="small" className="link-button" onClick={() => setDetail(s)}>
+                {s.name}
+              </Button>
+            ),
+          },
           { key: 'owner', header: 'Owner', sortable: true },
           { key: 'region', header: 'Region', sortable: true },
           { key: 'status', header: 'Status', sortable: true, cell: (s) => <Badge tone={TONE[s.status]} variant="soft" led>{s.status}</Badge> },
@@ -59,6 +69,51 @@ export function Services() {
           { key: 'lastDeploy', header: 'Last deploy', sortable: true, cell: (s) => when.format(s.lastDeploy) },
         ]}
       />
+      <Drawer
+        open={detail !== null}
+        onClose={() => setDetail(null)}
+        title={detail?.name ?? ''}
+        description={detail ? `${detail.owner} · ${detail.region}` : undefined}
+        actions={
+          detail && detail.status !== 'paused' ? (
+            <Button
+              variant="outlined"
+              color="warning"
+              onClick={() => {
+                const s = detail;
+                setDetail(null);
+                setConfirm([s]);
+              }}
+            >
+              Pause
+            </Button>
+          ) : undefined
+        }
+      >
+        {detail && (
+          <Tabs defaultValue="health">
+            <TabList aria-label="Service details">
+              <Tab value="health">Health</Tab>
+              <Tab value="cost">Cost</Tab>
+            </TabList>
+            <TabPanel value="health">
+              <div className="detail">
+                <Badge tone={TONE[detail.status]} variant="soft" led>
+                  {detail.status}
+                </Badge>
+                <Progress label={`Uptime ${detail.uptime.toFixed(2)}%`} value={detail.uptime} />
+                <p>Last deploy {when.format(detail.lastDeploy)}</p>
+              </div>
+            </TabPanel>
+            <TabPanel value="cost">
+              <div className="detail">
+                <p className="big-number">{money(detail.cost)}</p>
+                <p>per month, {money(Math.round(detail.cost / 30))} a day</p>
+              </div>
+            </TabPanel>
+          </Tabs>
+        )}
+      </Drawer>
       <Modal
         open={confirm !== null}
         onClose={() => setConfirm(null)}

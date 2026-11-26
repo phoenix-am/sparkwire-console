@@ -6,6 +6,7 @@ import { SettingsProvider, useSettings, type Energy } from './lib/settings';
 import { Overview } from './pages/Overview';
 import { Services } from './pages/Services';
 import { NewDeployment } from './pages/NewDeployment';
+import { Settings } from './pages/Settings';
 import { services } from './lib/data';
 
 const Icon = ({ d }: { d: string }) => (
@@ -17,6 +18,7 @@ const icons = {
   overview: 'M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z',
   services: 'M4 6h16M4 12h16M4 18h16',
   deploy: 'M12 2 4 14h7l-1 8 9-12h-7z',
+  settings: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1',
 };
 
 export function App() {
@@ -40,7 +42,7 @@ function Shell() {
   const { pathname } = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const active = pathname.startsWith('/services') ? 'services' : pathname.startsWith('/deploy') ? 'deploy' : 'overview';
+  const active = pathname.startsWith('/services') ? 'services' : pathname.startsWith('/deploy') ? 'deploy' : pathname.startsWith('/settings') ? 'settings' : 'overview';
 
   useEffect(() => {
     document.documentElement.lang = settings.locale;
@@ -66,6 +68,7 @@ function Shell() {
                 { id: 'overview', label: 'Overview', icon: <Icon d={icons.overview} />, onSelect: () => go('/') },
                 { id: 'services', label: 'Services', icon: <Icon d={icons.services} />, badge: services.filter((s) => s.status === 'failed').length || undefined, onSelect: () => go('/services') },
                 { id: 'deploy', label: 'New deployment', icon: <Icon d={icons.deploy} />, onSelect: () => go('/deploy') },
+                { id: 'settings', label: 'Settings', icon: <Icon d={icons.settings} />, onSelect: () => go('/settings') },
               ]}
             />
             <div className="main">
@@ -96,6 +99,7 @@ function Shell() {
                   <Route index element={<Overview />} />
                   <Route path="services" element={<Services />} />
                   <Route path="deploy" element={<NewDeployment />} />
+                  <Route path="settings" element={<Settings />} />
                 </Routes>
               </main>
             </div>
@@ -110,6 +114,7 @@ function Shell() {
                 { id: 'p-overview', label: 'Overview', onSelect: () => go('/') },
                 { id: 'p-services', label: 'Services', onSelect: () => go('/services') },
                 { id: 'p-deploy', label: 'New deployment', onSelect: () => go('/deploy') },
+                { id: 'p-settings', label: 'Settings', onSelect: () => go('/settings') },
               ] },
               { heading: 'Services', items: services.map((s) => ({ id: s.id, label: s.name, description: `${s.owner} · ${s.region}`, onSelect: () => go(`/services?q=${encodeURIComponent(s.name)}`) })) },
             ]}

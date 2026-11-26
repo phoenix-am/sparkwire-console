@@ -8,10 +8,21 @@ const axe = async (page: Page) => {
   ).toEqual([]);
 };
 
+// Any Sparkwire warning (a deprecated prop, a bad locale) fails the test.
+let warnings: string[] = [];
+test.beforeEach(({ page }) => {
+  warnings = [];
+  page.on('console', (m) => {
+    if (m.text().includes('[Sparkwire]')) warnings.push(m.text());
+  });
+});
+test.afterEach(() => expect(warnings).toEqual([]));
+
 for (const [name, path, heading] of [
   ['Overview', '/', 'Overview'],
   ['Services', '/services', 'Services'],
   ['New deployment', '/deploy', 'New deployment'],
+  ['Settings', '/settings', 'Settings'],
 ] as const) {
   test(`${name} has no accessibility violations, dark and light`, async ({ page, browserName }) => {
     // axe-core crashes Firefox's content process in CI (the page itself is fine: the theme test
@@ -120,4 +131,44 @@ test('@mobile phone: the menu opens the navigation and moves between pages', asy
   await page.getByRole('button', { name: 'Open menu' }).click();
   await page.getByRole('link', { name: 'Services' }).or(page.getByRole('button', { name: /^Services/ })).first().click();
   await expect(page.getByRole('heading', { level: 1, name: 'Services' })).toBeVisible();
+});
+
+test('A service opens in a drawer with health and cost tabs', async ({ page }) => {
+  await page.goto('/services');
+  await page.getByRole('button', { name: 'payments' }).click();
+  const drawer = page.getByRole('dialog', { name: 'payments' });
+  await expect(drawer).toBeVisible();
+  await expect(drawer.getByText(/Uptime \d/)).toBeVisible();
+  await drawer.getByRole('tab', { name: 'Cost' }).click();
+  await expect(drawer.getByText(/per month/)).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(drawer).toBeHidden();
+  await expect(page.getByRole('button', { name: 'payments' })).toBeFocused();
+});
+
+test('Pausing from the drawer asks first', async ({ page }) => {
+  await page.goto('/services');
+  await page.getByRole('button', { name: 'search', exact: true }).click();
+  await page.getByRole('dialog', { name: 'search' }).getByRole('button', { name: 'Pause' }).click();
+  await expect(page.getByRole('dialog', { name: 'Pause search?' })).toBeVisible();
+});
+
+test('Settings: team name is required, alerts toggle, config uploads', async ({ page }) => {
+  await page.goto('/settings');
+  const name = page.getByLabel('Team name');
+  await name.fill('');
+  await expect(page.getByText('Give the team a name.')).toBeVisible();
+  await name.fill('Payments');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('Team saved')).toBeVisible();
+
+  await page.getByRole('tab', { name: 'Alerts' }).click();
+  const paused = page.getByRole('switch', { name: 'When a service is paused' });
+  await expect(paused).not.toBeChecked();
+  await paused.click();
+  await expect(paused).toBeChecked();
+
+  await page.getByRole('tab', { name: 'Import' }).click();
+  await page.locator('input[type=file]').setInputFiles({ name: 'services.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
+  await expect(page.getByText('Read services.json')).toBeVisible();
 });
